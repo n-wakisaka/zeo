@@ -1,0 +1,11 @@
+*.so
+*.o
+config
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+zeda-config
+app/
+!app/*.c
+!app/makefile
