@@ -638,7 +638,7 @@ zVec3D *zMat3DToAA(zMat3D *m, zVec3D *aa)
   _zVec3DCreate( aa, m->c.yz-m->c.zy, m->c.zx-m->c.xz, m->c.xy-m->c.yx );
   l = _zVec3DNorm( aa );
   a = atan2( l, m->c.xx+m->c.yy+m->c.zz-1 );
-  if( !zIsTiny( l ) ){ /* singular case */
+  if( zIsTiny( l ) ){ /* singular case */
     zMat3DSymEig( m, eval, evec );
     for( i=0; i<3; i++ )
       if( zIsTiny( eval[i] - 1.0 ) )
