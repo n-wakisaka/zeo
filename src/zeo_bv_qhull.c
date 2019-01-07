@@ -463,7 +463,7 @@ bool _zQHHorizon(zQHFacetList *vs, zQHPoint *p, zQHFacetList *cone)
   zListInsertHead( cone, fc );
   s = ( s + 1 ) % 3;
   p0 = f->p[s];
-  n = zListNum( vs );
+  n = 3 * zListNum( vs );
   do{
     if( i++ > n ){ /* probably a circulation occurs */
       ZRUNERROR( ZEO_ERR_FATAL );
