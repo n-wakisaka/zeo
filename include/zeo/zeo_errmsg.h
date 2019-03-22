@@ -12,8 +12,11 @@
 #define ZEO_ERR_ZERODIV      "cannot divid by zero value"
 #define ZEO_ERR_ZERONORM     "cannot normalize zero vector"
 #define ZEO_ERR_SINGULARMAT  "matrix is singular"
+#define ZEO_ERR_NONSO3       "matrix is not orthonormal"
 
 #define ZEO_ERR_RGB          "invalid size of RGB specification, strlen(%s)=%d"
+
+#define ZEO_ERR_INVINDEX     "invalid index specified"
 
 #define ZEO_ERR_ELEM_DEGP    "too small normal vector to define a plane"
 #define ZEO_ERR_ELEM_DEGE    "edge degenerated"
@@ -28,6 +31,12 @@
 #define ZEO_ERR_OPT_MANY     "too many optical-infos specified"
 #define ZEO_ERR_OPT_INV      "invalid description for optical-info"
 #define ZEO_ERR_OPT_UNNAME   "unnamed optical-info exists"
+
+#define ZEO_ERR_NURBS_INVDIM "invalid dimension specified for NURBS, or lack of control points"
+#define ZEO_ERR_NURBS_SIZMIS      "size mismatch of NURBS surfaces"
+#define ZEO_ERR_NURBS_KNOTALREADY "knot already allocated"
+#define ZEO_ERR_NURBS_CPALREADY   "control point already allocated"
+#define ZEO_ERR_NURBS_INVCP       "invalid index of control point specified"
 
 #define ZEO_ERR_PRIM_ZEROC   "zero-distance centers specified"
 

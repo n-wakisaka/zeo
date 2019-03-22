@@ -119,6 +119,15 @@ __EXPORT zVec3DAddr *zVec3DAddrListInsert(zVec3DAddrList *list, zVec3D *v);
  */
 __EXPORT zVec3DAddrList *zVec3DAddrListFromArray(zVec3DAddrList *list, zVec3D varr[], int num);
 
+/*! \brief clone a list of vectors.
+ *
+ * zVec3DAddrListClone() clones a list of vectors \a src to \a dest.
+ * \return
+ * zVec3DAddrListClone() returns a pointer \a dest if it succeeds.
+ * Otherwise, the null pointer is returned.
+ */
+__EXPORT zVec3DAddrList *zVec3DAddrListClone(zVec3DAddrList *src, zVec3DAddrList *dest);
+
 /*! \brief destroy a list of 3D vectors.
  *
  * zVec3DAddrListDestroy() destroys a list of vectors \a list.
@@ -179,6 +188,12 @@ __EXPORT void zVec3DAddrListDataFWrite(FILE *fp, zVec3DAddrList *list);
 /*! \brief a naive algorithm to find the nearest neighbor in a list of 3D vectors.
  */
 __EXPORT zVec3D *zVec3DListNN(zVec3DList *list, zVec3D *v, double *dmin);
+
+/*! \brief support map of a set of points with respect to a direction vector. */
+__EXPORT zVec3D *zVec3DSupportMap(zVec3D p[], int n, zVec3D *v);
+
+/*! \brief support map of a list of points with respect to a direction vector. */
+__EXPORT zVec3D *zVec3DListSupportMap(zVec3DList *pl, zVec3D *v);
 
 __END_DECLS
 
