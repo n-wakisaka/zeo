@@ -5,6 +5,6 @@ GPATH
 GRTAGS
 GSYMS
 GTAGS
-app/
+app/*
 !app/*.c
 !app/makefile
