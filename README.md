@@ -1,6 +1,10 @@
 Zeo - Z/Geometry and optics computation library.
 Copyright (C) 2005 Tomomichi Sugihara (Zhidao)
 
+| *master* | *develop* |
+|----------|-----------|
+| [![Build Status](https://travis-ci.org/n-wakisaka/zeo.svg?branch=master)](https://travis-ci.org/n-wakisaka/zeo) | [![Build Status](https://travis-ci.org/n-wakisaka/zeo.svg?branch=develop)](https://travis-ci.org/n-wakisaka/zeo)
+
 -----------------------------------------------------------------
 [What is this?]
 
