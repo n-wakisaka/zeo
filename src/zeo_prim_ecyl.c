@@ -38,12 +38,12 @@ zECyl3D *zECyl3DCreate(zECyl3D *cyl, zVec3D *c1, zVec3D *c2, double r1, double r
 /* initialize a 3D elliptic cylinder. */
 zECyl3D *zECyl3DInit(zECyl3D *cyl)
 {
-  zVec3DClear( zECyl3DCenter(cyl,0) );
-  zVec3DClear( zECyl3DCenter(cyl,1) );
+  zVec3DZero( zECyl3DCenter(cyl,0) );
+  zVec3DZero( zECyl3DCenter(cyl,1) );
   zECyl3DSetRadius( cyl, 0, 0 );
   zECyl3DSetRadius( cyl, 1, 0 );
-  zVec3DClear( zECyl3DRadVec(cyl,0) );
-  zVec3DClear( zECyl3DRadVec(cyl,1) );
+  zVec3DZero( zECyl3DRadVec(cyl,0) );
+  zVec3DZero( zECyl3DRadVec(cyl,1) );
   zECyl3DSetDiv( cyl, ZEO_PRIM_DEFAULT_DIV );
   return cyl;
 }
@@ -74,10 +74,10 @@ zECyl3D *zECyl3DMirror(zECyl3D *src, zECyl3D *dest, zAxis axis)
 }
 
 /* transform coordinates of a 3D elliptic cylinder. */
-zECyl3D *zECyl3DXfer(zECyl3D *src, zFrame3D *f, zECyl3D *dest)
+zECyl3D *zECyl3DXform(zECyl3D *src, zFrame3D *f, zECyl3D *dest)
 {
-  zXfer3D( f, zECyl3DCenter(src,0), zECyl3DCenter(dest,0) );
-  zXfer3D( f, zECyl3DCenter(src,1), zECyl3DCenter(dest,1) );
+  zXform3D( f, zECyl3DCenter(src,0), zECyl3DCenter(dest,0) );
+  zXform3D( f, zECyl3DCenter(src,1), zECyl3DCenter(dest,1) );
   zECyl3DSetRadius( dest, 0, zECyl3DRadius(src,0) );
   zECyl3DSetRadius( dest, 1, zECyl3DRadius(src,1) );
   zMulMat3DVec3D( zFrame3DAtt(f), zECyl3DRadVec(src,0), zECyl3DRadVec(dest,0) );
@@ -87,10 +87,10 @@ zECyl3D *zECyl3DXfer(zECyl3D *src, zFrame3D *f, zECyl3D *dest)
 }
 
 /* inversely transform coordinates of a 3D elliptic cylinder. */
-zECyl3D *zECyl3DXferInv(zECyl3D *src, zFrame3D *f, zECyl3D *dest)
+zECyl3D *zECyl3DXformInv(zECyl3D *src, zFrame3D *f, zECyl3D *dest)
 {
-  zXfer3DInv( f, zECyl3DCenter(src,0), zECyl3DCenter(dest,0) );
-  zXfer3DInv( f, zECyl3DCenter(src,1), zECyl3DCenter(dest,1) );
+  zXform3DInv( f, zECyl3DCenter(src,0), zECyl3DCenter(dest,0) );
+  zXform3DInv( f, zECyl3DCenter(src,1), zECyl3DCenter(dest,1) );
   zECyl3DSetRadius( dest, 0, zECyl3DRadius(src,0) );
   zECyl3DSetRadius( dest, 1, zECyl3DRadius(src,1) );
   zMulMat3DTVec3D( zFrame3DAtt(f), zECyl3DRadVec(src,0), zECyl3DRadVec(dest,0) );
@@ -295,9 +295,9 @@ zECyl3D *zECyl3DFScan(FILE *fp, zECyl3D *cyl)
   _zECylParam prm;
 
   zECyl3DInit( cyl );
-  zVec3DClear( &prm.c[0] );
-  zVec3DClear( &prm.c[1] );
-  zVec3DClear( &prm.ref );
+  zVec3DZero( &prm.c[0] );
+  zVec3DZero( &prm.c[1] );
+  zVec3DZero( &prm.ref );
   prm.r[0] = prm.r[1] = 0;
   prm.ic = prm.ir = prm.div = 0;
   zFieldFScan( fp, _zECyl3DFScan, &prm );
@@ -327,10 +327,10 @@ static void *_zPrim3DCloneECyl(void *src, void *dest){
 static void *_zPrim3DMirrorECyl(void *src, void *dest, zAxis axis){
   return zECyl3DMirror( src, dest, axis ); }
 static void _zPrim3DDestroyECyl(void *prim){}
-static void *_zPrim3DXferECyl(void *src, zFrame3D *f, void *dest){
-  return zECyl3DXfer( src, f, dest ); }
-static void *_zPrim3DXferInvECyl(void *src, zFrame3D *f, void *dest){
-  return zECyl3DXferInv( src, f, dest ); }
+static void *_zPrim3DXformECyl(void *src, zFrame3D *f, void *dest){
+  return zECyl3DXform( src, f, dest ); }
+static void *_zPrim3DXformInvECyl(void *src, zFrame3D *f, void *dest){
+  return zECyl3DXformInv( src, f, dest ); }
 static double _zPrim3DClosestECyl(void *prim, zVec3D *p, zVec3D *cp){
   return zECyl3DClosest( prim, p, cp ); }
 static double _zPrim3DPointDistECyl(void *prim, zVec3D *p){
@@ -358,8 +358,8 @@ zPrimCom zprim_ecyl3d_com = {
   _zPrim3DCloneECyl,
   _zPrim3DMirrorECyl,
   _zPrim3DDestroyECyl,
-  _zPrim3DXferECyl,
-  _zPrim3DXferInvECyl,
+  _zPrim3DXformECyl,
+  _zPrim3DXformInvECyl,
   _zPrim3DClosestECyl,
   _zPrim3DPointDistECyl,
   _zPrim3DPointIsInsideECyl,

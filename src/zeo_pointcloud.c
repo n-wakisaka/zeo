@@ -419,7 +419,7 @@ bool _zPCDDataASCIIFRead(FILE *fp, _zPCD *pcd, zVec3DList *pc)
   zVec3D v, tf;
 
   while( fgets( buf, BUFSIZ, fp ) ){
-    zVec3DClear( &v );
+    zVec3DZero( &v );
     for( i=0; i<pcd->fieldnum; i++ ){
       if( !zSToken( buf, tkn, BUFSIZ ) ){
         ZRUNWARN( "short of data" );
@@ -429,7 +429,7 @@ bool _zPCDDataASCIIFRead(FILE *fp, _zPCD *pcd, zVec3DList *pc)
         pcd->field[i].read_ascii( &pcd->field[i], tkn, &v );
     }
     if( !zVec3DIsNan( &v ) ){
-      zXfer3D( &pcd->viewpoint, &v, &tf );
+      zXform3D( &pcd->viewpoint, &v, &tf );
       zVec3DListInsert( pc, &tf );
     }
   }
@@ -442,13 +442,13 @@ bool _zPCDDataBINFRead(FILE *fp, _zPCD *pcd, zVec3DList *pc)
   zVec3D v, tf;
 
   while( !feof( fp ) ){
-    zVec3DClear( &v );
+    zVec3DZero( &v );
     for( i=0; i<pcd->fieldnum; i++ ){
       if( pcd->field[i].read_bin )
         pcd->field[i].read_bin( &pcd->field[i], fp, &v );
     }
     if( !zVec3DIsNan( &v ) ){
-      zXfer3D( &pcd->viewpoint, &v, &tf );
+      zXform3D( &pcd->viewpoint, &v, &tf );
       zVec3DListInsert( pc, &tf );
     }
   }
@@ -482,9 +482,7 @@ bool zVec3DListPCDFRead(FILE *fp, zVec3DList *pc)
   return true;
 }
 
-/* zVec3DListReadPCDFile
- * - read point cloud from PCD file.
- */
+/* read point cloud from PCD file. */
 bool zVec3DListReadPCDFile(zVec3DList *pc, char filename[])
 {
   FILE *fp;

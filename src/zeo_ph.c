@@ -83,12 +83,12 @@ void zPH3DDestroy(zPH3D *ph)
 
 /* transform coordinates of a 3D polyhedron.
  * NOTE: it assumes that 'src' is already cloned to 'dest'. */
-zPH3D *zPH3DXfer(zPH3D *src, zFrame3D *f, zPH3D *dest)
+zPH3D *zPH3DXform(zPH3D *src, zFrame3D *f, zPH3D *dest)
 {
   register int i;
 
   for( i=0; i<zPH3DVertNum(dest); i++ )
-    zXfer3D( f, zPH3DVert(src,i), zPH3DVert(dest,i) );
+    zXform3D( f, zPH3DVert(src,i), zPH3DVert(dest,i) );
   for( i=0; i<zPH3DFaceNum(dest); i++ )
     zTri3DCalcNorm( zPH3DFace(dest,i) );
   return dest;
@@ -96,12 +96,12 @@ zPH3D *zPH3DXfer(zPH3D *src, zFrame3D *f, zPH3D *dest)
 
 /* inversely transform coordinates of a 3D polyhedron.
  * NOTE: it assumes that src is already cloned to dest. */
-zPH3D *zPH3DXferInv(zPH3D *src, zFrame3D *f, zPH3D *dest)
+zPH3D *zPH3DXformInv(zPH3D *src, zFrame3D *f, zPH3D *dest)
 {
   register int i;
 
   for( i=0; i<zPH3DVertNum(dest); i++ )
-    zXfer3DInv( f, zPH3DVert(src,i), zPH3DVert(dest,i) );
+    zXform3DInv( f, zPH3DVert(src,i), zPH3DVert(dest,i) );
   for( i=0; i<zPH3DFaceNum(dest); i++ )
     zTri3DCalcNorm( zPH3DFace(dest,i) );
   return dest;
@@ -187,7 +187,7 @@ zVec3D *zPH3DBarycenter(zPH3D *ph, zVec3D *c)
   zVec3D bc;
   double v, vol;
 
-  zVec3DClear( c );
+  zVec3DZero( c );
   for( vol=0, i=0; i<zPH3DFaceNum(ph); i++ ){
     v = zTri3DConeVolume( zPH3DFace(ph,i), ZVEC3DZERO );
     vol += v;
@@ -205,7 +205,7 @@ zMat3D *zPH3DInertia(zPH3D *ph, zMat3D *inertia)
   register int j;
   zMat3D i;
 
-  zMat3DClear( inertia );
+  zMat3DZero( inertia );
   for( j=0; j<zPH3DFaceNum(ph); j++ ){
     zTri3DConeInertia( zPH3DFace(ph,j), &i );
     _zMat3DAddDRC( inertia, &i );
