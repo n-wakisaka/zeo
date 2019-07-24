@@ -166,7 +166,12 @@ __EXPORT bool zShape3DPointIsInside(zShape3D *shape, zVec3D *p, bool rim);
 
 __EXPORT zShape3D *zShape3DToPH(zShape3D *shape);
 
-#define ZSHAPE_TAG "shape"
+#define ZTK_TAG_SHAPE "shape"
+
+/*! \brief register a definition of tag-and-keys for a 3D shape to a ZTK format processor. */
+__EXPORT bool zShape3DRegZTK(ZTK *ztk);
+/*! \brief read a 3D shape from a ZTK format processor. */
+__EXPORT zShape3D *zShape3DFromZTK(zShape3D *shape, zShape3D *sarray, int ns, zOpticalInfo *oarray, int no, ZTK *ztk);
 
 /*! \brief scan and print a 3D shape.
  *
@@ -211,6 +216,11 @@ __EXPORT zShape3D *zShape3DFScan(FILE *fp, zShape3D *shape, zShape3D *sarray, in
   zShape3DFScan( stdin, (s), (sa), (ns), (oa), (no) )
 __EXPORT void zShape3DFPrint(FILE *fp, zShape3D *shape);
 #define zShape3DPrint(s) zShape3DFPrint( stdout, (s) )
+
+/*! \struct zShape3DArray
+ * \brief array class of 3D shapes.
+ */
+zArrayClass( zShape3DArray, zShape3D );
 
 __END_DECLS
 

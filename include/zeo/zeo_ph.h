@@ -11,17 +11,14 @@
 
 __BEGIN_DECLS
 
-zArrayClass( zVertArray, zVec3D );
-zArrayClass( zFaceArray, zTri3D );
-
 /* ********************************************************** */
 /* CLASS: zPH3D
  * 3D polyhedron class
  * ********************************************************** */
 
 typedef struct{
-  zVertArray vert;
-  zFaceArray face;
+  zVec3DArray vert;
+  zTri3DArray face;
 } zPH3D;
 
 #define zPH3DVertNum(ph)      zArraySize(&(ph)->vert)
@@ -186,6 +183,11 @@ __EXPORT zPH3D *zPH3DPyramid(zPH3D *pyr, zVec3D bottom[], int n, zVec3D *vert);
 __EXPORT zPH3D *zPH3DTorus(zPH3D *torus, zVec3D loop[], int n, int div, zVec3D *center, zVec3D *axis);
 __EXPORT zPH3D *zPH3DLathe(zPH3D *lathe, zVec3D rim[], int n, int div, zVec3D *center, zVec3D *axis);
 
+/*! \brief register a definition of tag-and-keys for a 3D polyhedron cylinder to a ZTK format processor. */
+__EXPORT bool zPH3DDefRegZTK(ZTK *ztk, char *tag);
+/*! \brief read a 3D polyhedron from a ZTK format processor. */
+__EXPORT zPH3D *zPH3DFromZTK(zPH3D *ph, ZTK *ztk);
+
 /*! \brief scan and print a 3D polyhedron.
  *
  * zPH3DFScan() scans information of a 3D polyhedron from
@@ -216,5 +218,7 @@ __EXPORT void zPH3DFPrint(FILE *fp, zPH3D *ph);
 #define zPH3DPrint(ph) zPH3DFPrint( stdout, (ph) )
 
 __END_DECLS
+
+#include <zeo/zeo_ph_stl.h>
 
 #endif /* __ZEO_PH_H__ */
