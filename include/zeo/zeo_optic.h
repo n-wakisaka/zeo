@@ -12,7 +12,7 @@
 __BEGIN_DECLS
 
 /* ********************************************************** */
-/*! \brief optical characterization parameters
+/*! \brief optical characteristic parameters
  *//********************************************************* */
 typedef struct{
   Z_NAMED_CLASS
@@ -61,7 +61,7 @@ __EXPORT zOpticalInfo *zOpticalInfoCreate(zOpticalInfo *oi, float ar, float ag, 
 __EXPORT zOpticalInfo *zOpticalInfoCopy(zOpticalInfo *src, zOpticalInfo *dest);
 __EXPORT zOpticalInfo *zOpticalInfoClone(zOpticalInfo *src, zOpticalInfo *dest);
 #define zOpticalInfoDestroy(o) do{\
-  zNameDestroy(o);\
+  zNameFree(o);\
   zOpticalInfoInit(o);\
 } while(0)
 
@@ -72,7 +72,7 @@ __EXPORT zOpticalInfo *zOpticalInfoMul(zOpticalInfo *oi1, zOpticalInfo *oi2, zOp
 __EXPORT zOpticalInfo *zOpticalInfoBlend(zOpticalInfo *oi1, zOpticalInfo *oi2, double ratio, zOpticalInfo *oi, char *name);
 
 /* tag to identify optical info. */
-#define ZOPTIC_TAG "optic"
+#define ZTK_TAG_OPTIC "optic"
 
 /*! \brief scan and print optical parameters.
  *
@@ -111,6 +111,17 @@ __EXPORT zOpticalInfo *zOpticalInfoFScan(FILE *fp, zOpticalInfo *oi);
 #define zOpticalInfoScan(i) zOpticalInfoFScan( stdin, (i) )
 __EXPORT void zOpticalInfoFPrint(FILE *fp, zOpticalInfo *oi);
 #define zOpticalInfoPrint(i) zOpticalInfoFPrint( stdout, (i) )
+
+/* register a definition of tag-and-key for the optical info to a ZTK format processor. */
+__EXPORT bool zOpticalInfoRegZTK(ZTK *ztk);
+
+/* encode an optical info from a ZTK format processor. */
+__EXPORT zOpticalInfo *zOpticalInfoFromZTK(zOpticalInfo *oi, ZTK *ztk);
+
+/*! \struct zOpticalInfoArray
+ * \brief array class of a set of optical parameters.
+ */
+zArrayClass( zOpticalInfoArray, zOpticalInfo );
 
 __END_DECLS
 

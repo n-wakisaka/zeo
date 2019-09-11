@@ -444,6 +444,7 @@ __EXPORT double zVec3DAngle(zVec3D *v1, zVec3D *v2, zVec3D *n);
 __EXPORT zVec3D *zVec3DProj(zVec3D *v, zVec3D *n, zVec3D *pv);
 __EXPORT zVec3D *zVec3DOrthogonalize(zVec3D *v, zVec3D *n, zVec3D *ov);
 __EXPORT bool zVec3DOrthoSpace(zVec3D *v, zVec3D *sv1, zVec3D *sv2);
+__EXPORT bool zVec3DOrthoNormalSpace(zVec3D *v, zVec3D *sv1, zVec3D *sv2);
 __EXPORT zVec3D *zVec3DRot(zVec3D *v, zVec3D *aa, zVec3D *rv);
 
 /* ********************************************************** */
@@ -520,6 +521,9 @@ __EXPORT zVec3D *zAngVelToZYZVelSC(zVec3D *angvel, double sa, double ca, double 
 /* I/O
  * ********************************************************** */
 
+/*! \brief read a 3D vector from a ZTK format processor. */
+__EXPORT zVec3D *zVec3DFromZTK(zVec3D *v, ZTK *ztk);
+
 /*! \brief scan and print a 3D vector.
  *
  * zVec3DFScan() scans three values from the current position of
@@ -559,6 +563,11 @@ __EXPORT zVec3D *zVec3DDataNLFPrint(FILE *fp, zVec3D *v);
 #define zVec3DDataNLPrint(v) zVec3DDataNLFPrint( stdout, (v) )
 __EXPORT zVec3D *zVec3DFPrint(FILE *fp, zVec3D *v);
 #define zVec3DPrint(v) zVec3DFPrint( stdout, (v) )
+
+/*! \struct zVec3DArray
+ * \brief array class of 3D vectors.
+ */
+zArrayClass( zVec3DArray, zVec3D );
 
 __END_DECLS
 

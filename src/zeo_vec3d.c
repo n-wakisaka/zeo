@@ -350,6 +350,16 @@ bool zVec3DOrthoSpace(zVec3D *v, zVec3D *sv1, zVec3D *sv2)
   return true;
 }
 
+/* create the orthonormal space of a 3D vector. */
+bool zVec3DOrthoNormalSpace(zVec3D *v, zVec3D *sv1, zVec3D *sv2)
+{
+  if( !zVec3DOrthoSpace( v, sv1, sv2 ) ) return false;
+  zVec3DNormalizeDRC( v );
+  zVec3DNormalizeDRC( sv1 );
+  zVec3DNormalizeDRC( sv2 );
+  return true;
+}
+
 /* rotate a 3D vector along an axis. */
 zVec3D *zVec3DRot(zVec3D *v, zVec3D *aa, zVec3D *rv)
 {
@@ -467,6 +477,15 @@ zVec3D *zAngVelToZYZVelSC(zVec3D *angvel, double sa, double ca, double sb, doubl
 /* ********************************************************** */
 /* I/O
  * ********************************************************** */
+
+/* read a 3D vector from a ZTK format processor. */
+zVec3D *zVec3DFromZTK(zVec3D *v, ZTK *ztk)
+{
+  v->e[0] = ZTKDouble(ztk);
+  v->e[1] = ZTKDouble(ztk);
+  v->e[2] = ZTKDouble(ztk);
+  return v;
+}
 
 /* scan a 3D vector from a file. */
 zVec3D *zVec3DFScan(FILE *fp, zVec3D *v)

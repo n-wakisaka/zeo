@@ -4,7 +4,7 @@ ambient: 0.8, 0.8, 0.2
 diffuse: 0.8, 0.8, 0.2
 specular: 0.0, 0.0, 0.0
 alpha: 1
-exp: 1
+esr: 1
 
 [optic]
 name: cyan
@@ -12,7 +12,7 @@ ambient: 0.4, 1.0, 1.0
 diffuse: 0.4, 1.0, 1.0
 specular: 0.0, 0.0, 0.0
 alpha: 0.8
-exp: 1
+esr: 1
 
 [optic]
 name: green
@@ -20,7 +20,7 @@ ambient: 0.2, 1.0, 0.2
 diffuse: 0.2, 1.0, 0.2
 specular: 0.0, 0.0, 0.0
 alpha: 0.9
-exp: 1
+esr: 1
 
 [shape]
 name : cone
@@ -29,6 +29,7 @@ optic: green
 bb: OBB
 center: ( -0.2, 0.2,-0.2 )
 vert: ( -0.2, 0.0, 0.1 )
+vert: ( 100, 200, 300 )
 radius: 0.08
 
 [shape]
@@ -37,7 +38,9 @@ type : sphere
 optic: yellow
 bb: OBB
 center: ( -0.2, -0.1, 0.0 )
+center: ( 100, 200, 300 )
 radius: 0.1
+radius: 100
 
 [shape]
 name : cylinder
@@ -46,4 +49,6 @@ optic: cyan
 bb: OBB
 center: ( -0.2,-0.1,-0.2 )
 center: ( -0.2, 0.2, 0.2 )
+center: ( -0.2, 1.2, 0.2 )
 radius: 0.06
+radius: 0.6
