@@ -140,54 +140,17 @@ __EXPORT zVec3D *zBox3DVert(zBox3D *box, int i, zVec3D *v);
  */
 __EXPORT zPH3D *zBox3DToPH(zBox3D *box, zPH3D *ph);
 
-/*! \brief register a definition of tag-and-keys for a 3D box to a ZTK format processor. */
-__EXPORT bool zBox3DDefRegZTK(ZTK *ztk, char *tag);
-/*! \brief read a 3D box from a ZTK format processor. */
-__EXPORT zBox3D *zBox3DFromZTK(zBox3D *box, ZTK *ztk);
-
-/*! \brief scan and print a box.
- *
- * zBox3DFScan() scans information of a box from the current
- * position of a file \a fp, and creates a new box instance
- * \a box. An acceptable data file format is as follows.
- *
- *  center: <x> <y> <z>
- *  ax: <x> <y> <z>
- *  ay: <x> <y> <z>
- *  az: <x> <y> <z>
- *  depth: <d>
- *  width: <w>
- *  height: <h>
- *
- * Each bracketed value must be substituted for a real number.
- * zBox3DScan() scans information for \a box from the standard
- * input.
- *
- * zBox3DFPrint() prints information of \a box out to the current
- * position of a file \a fp in the same format with the above.
- * zBox3DPrint() prints information of \a box out to the standard
- * out.
- * \return
- * zBox3DFScan() and zBox3DScan() return a pointer \a box.
- *
- * Neither zBox3DFPrint() nor zBox3DPrint() returns any values.
- */
-__EXPORT zBox3D *zBox3DFScan(FILE *fp, zBox3D *box);
-#define zBox3DScan(b) zBox3DFScan( stdin, b )
-__EXPORT void zBox3DFPrint(FILE *fp, zBox3D *box);
-#define zBox3DPrint(b) zBox3DFPrint( stdout, b )
-
 /*! \brief print a box out to a file in a format to be plotted. */
 __EXPORT void zBox3DDataFPrint(FILE *fp, zBox3D *box);
 
 /* methods for abstraction */
-extern zShape3DCom zeo_shape_box3d_com;
+extern zShape3DCom zeo_shape3d_box_com;
 
 #define zShape3DBox(s) ( (zBox3D*)(s)->body )
 
-__EXPORT zShape3D *zShape3DCreateBox(zShape3D *shape, zVec3D *c, zVec3D *ax, zVec3D *ay, zVec3D *az, double d, double w, double h);
+__EXPORT zShape3D *zShape3DBoxCreate(zShape3D *shape, zVec3D *c, zVec3D *ax, zVec3D *ay, zVec3D *az, double d, double w, double h);
 
-__EXPORT zShape3D *zShape3DCreateBoxAlign(zShape3D *shape, zVec3D *c, double d, double w, double h);
+__EXPORT zShape3D *zShape3DBoxCreateAlign(zShape3D *shape, zVec3D *c, double d, double w, double h);
 
 __END_DECLS
 

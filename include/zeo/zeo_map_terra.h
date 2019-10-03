@@ -121,15 +121,12 @@ __EXPORT void zTerraZRange(zTerra *terra, double *zmin, double *zmax);
 __EXPORT double zTerraZ(zTerra *terra, double x, double y);
 
 /*! \brief register a definition of tag-and-keys for a 3D polyhedron cylinder to a ZTK format processor. */
-__EXPORT bool zTerraDefRegZTK(ZTK *ztk, char *tag);
+__EXPORT bool zTerraRegZTK(ZTK *ztk, char *tag);
 /*! \brief read a terrain elevation map from a ZTK format processor. */
 __EXPORT zTerra *zTerraFromZTK(zTerra *terra, ZTK *ztk);
 
-/*! \brief scan an elevation map from a file. */
-__EXPORT zTerra *zTerraFScan(FILE *fp, zTerra *terra);
-
-/*! \brief print an elevation map out to a file. */
-__EXPORT void zTerraFPrint(FILE *fp, zTerra *terra);
+/*! \brief print an elevation map out to a file in ZTK format. */
+__EXPORT void zTerraFPrintZTK(FILE *fp, zTerra *terra);
 
 /*! \brief print an elevation map out to a file in a plot-friendly format. */
 __EXPORT void zTerraDataFPrint(FILE *fp, zTerra *terra);

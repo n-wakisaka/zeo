@@ -11,8 +11,6 @@
  * 3D cylinder class
  * ********************************************************** */
 
-static bool _zCyl3DFScan(FILE *fp, void *instance, char *buf, bool *success);
-
 /* create a 3D cylinder. */
 zCyl3D *zCyl3DCreate(zCyl3D *cyl, zVec3D *c1, zVec3D *c2, double r, int div)
 {
@@ -249,150 +247,89 @@ static void *_zCyl3DDivFromZTK(void *obj, int i, void *arg, ZTK *ztk){
   zCyl3DDiv((zCyl3D*)obj) = zShape3DDivFromZTK(ztk);
   return obj; }
 
-static void _zCyl3DCenterFPrint(FILE *fp, int i, void *obj){
+static void _zCyl3DCenterFPrintZTK(FILE *fp, int i, void *obj){
   zVec3DFPrint( fp, zCyl3DCenter((zCyl3D*)obj,i) ); }
-static void _zCyl3DRadiusFPrint(FILE *fp, int i, void *obj){
+static void _zCyl3DRadiusFPrintZTK(FILE *fp, int i, void *obj){
   fprintf( fp, "%.10g\n", zCyl3DRadius((zCyl3D*)obj) ); }
-static void _zCyl3DDivFPrint(FILE *fp, int i, void *obj){
+static void _zCyl3DDivFPrintZTK(FILE *fp, int i, void *obj){
   fprintf( fp, "%d\n", zCyl3DDiv((zCyl3D*)obj) ); }
 
 static ZTKPrp __ztk_prp_shape_cyl[] = {
-  { "center", 2, _zCyl3DCenterFromZTK, _zCyl3DCenterFPrint },
-  { "radius", 1, _zCyl3DRadiusFromZTK, _zCyl3DRadiusFPrint },
-  { "div", 1, _zCyl3DDivFromZTK, _zCyl3DDivFPrint },
+  { "center", 2, _zCyl3DCenterFromZTK, _zCyl3DCenterFPrintZTK },
+  { "radius", 1, _zCyl3DRadiusFromZTK, _zCyl3DRadiusFPrintZTK },
+  { "div", 1, _zCyl3DDivFromZTK, _zCyl3DDivFPrintZTK },
 };
-
-/* register a definition of tag-and-keys for a 3D cylinder to a ZTK format processor. */
-bool zCyl3DDefRegZTK(ZTK *ztk, char *tag)
-{
-  return ZTKDefRegPrp( ztk, tag, __ztk_prp_shape_cyl );
-}
-
-/* read a 3D cylinder from a ZTK format processor. */
-zCyl3D *zCyl3DFromZTK(zCyl3D *cyl, ZTK *ztk)
-{
-  zCyl3DInit( cyl );
-  return ZTKEncodeKey( cyl, NULL, ztk, __ztk_prp_shape_cyl );
-}
-
-typedef struct{
-  zVec3D c[2];
-  int ic;
-  double r;
-  int div;
-} _zCyl3DParam;
-
-/* (static)
- * scan a 3D cylinder (internal function). */
-bool _zCyl3DFScan(FILE *fp, void *instance, char *buf, bool *success)
-{
-  _zCyl3DParam *prm;
-
-  prm = instance;
-  if( strcmp( buf, "center" ) == 0 ){
-    if( prm->ic > 1 )
-      ZRUNWARN( ZEO_ERR_CENTER_MANY );
-    else
-      zVec3DFScan( fp, &prm->c[prm->ic++] );
-  } else if( strcmp( buf, "radius" ) == 0 ){
-    prm->r = zFDouble( fp );
-  } else if( strcmp( buf, "div" ) == 0 ){
-    prm->div = zFInt( fp );
-  } else
-    return false;
-  return true;
-}
-
-/* scan a 3D cylinder from a file. */
-zCyl3D *zCyl3DFScan(FILE *fp, zCyl3D *cyl)
-{
-  _zCyl3DParam prm;
-
-  zCyl3DInit( cyl );
-  zVec3DZero( &prm.c[0] );
-  zVec3DZero( &prm.c[1] );
-  prm.ic = 0;
-  prm.r = 0;
-  prm.div = 0;
-  zFieldFScan( fp, _zCyl3DFScan, &prm );
-  return zCyl3DCreate( cyl, &prm.c[0], &prm.c[1], prm.r, prm.div );
-}
-
-/* print out a 3D cylinder to a file. */
-void zCyl3DFPrint(FILE *fp, zCyl3D *cyl)
-{
-  ZTKPrpKeyFPrint( fp, cyl, __ztk_prp_shape_cyl );
-}
 
 /* methods for abstraction */
 
-static void *_zShape3DInitCyl(void* shape){
+static void *_zShape3DCylInit(void* shape){
   return zCyl3DInit( shape ); }
-static void *_zShape3DAllocCyl(void){
+static void *_zShape3DCylAlloc(void){
   return zCyl3DAlloc(); }
-static void *_zShape3DCloneCyl(void *src){
+static void *_zShape3DCylClone(void *src){
   zCyl3D *cln;
   return ( cln = zCyl3DAlloc() ) ? zCyl3DCopy( src, cln ) : NULL; }
-static void *_zShape3DMirrorCyl(void *src, zAxis axis){
+static void *_zShape3DCylMirror(void *src, zAxis axis){
   zCyl3D *mrr;
   return ( mrr = zCyl3DAlloc() ) ? zCyl3DMirror( src, mrr, axis ) : NULL; }
-static void _zShape3DDestroyCyl(void *shape){}
-static void *_zShape3DXformCyl(void *src, zFrame3D *f, void *dest){
+static void _zShape3DCylDestroy(void *shape){}
+static void *_zShape3DCylXform(void *src, zFrame3D *f, void *dest){
   return zCyl3DXform( src, f, dest ); }
-static void *_zShape3DXformInvCyl(void *src, zFrame3D *f, void *dest){
+static void *_zShape3DCylXformInv(void *src, zFrame3D *f, void *dest){
   return zCyl3DXformInv( src, f, dest ); }
-static double _zShape3DClosestCyl(void *shape, zVec3D *p, zVec3D *cp){
+static double _zShape3DCylClosest(void *shape, zVec3D *p, zVec3D *cp){
   return zCyl3DClosest( shape, p, cp ); }
-static double _zShape3DPointDistCyl(void *shape, zVec3D *p){
+static double _zShape3DCylPointDist(void *shape, zVec3D *p){
   return zCyl3DPointDist( shape, p ); }
-static bool _zShape3DPointIsInsideCyl(void *shape, zVec3D *p, bool rim){
+static bool _zShape3DCylPointIsInside(void *shape, zVec3D *p, bool rim){
   return zCyl3DPointIsInside( shape, p, rim ); }
-static double _zShape3DVolumeCyl(void *shape){
+static double _zShape3DCylVolume(void *shape){
   return zCyl3DVolume( shape ); }
-static zVec3D *_zShape3DBarycenterCyl(void *shape, zVec3D *c){
+static zVec3D *_zShape3DCylBarycenter(void *shape, zVec3D *c){
   return zCyl3DBarycenter( shape, c ); }
-static zMat3D *_zShape3DInertiaCyl(void *shape, zMat3D *i){
+static zMat3D *_zShape3DCylInertia(void *shape, zMat3D *i){
   return zCyl3DInertia( shape, i ); }
-static void _zShape3DBaryInertiaCyl(void *shape, zVec3D *c, zMat3D *i){
+static void _zShape3DCylBaryInertia(void *shape, zVec3D *c, zMat3D *i){
   zCyl3DBarycenter( shape, c );
   zCyl3DInertia( shape, i ); }
-static zPH3D *_zShape3DToPHCyl(void *shape, zPH3D *ph){
+static zPH3D *_zShape3DCylToPH(void *shape, zPH3D *ph){
   return zCyl3DToPH( shape, ph ); }
-static void *_zShape3DParseZTKCyl(void *shape, ZTK *ztk){
-  return zCyl3DFromZTK( shape, ztk ); }
-static void *_zShape3DFScanCyl(FILE *fp, void *shape){
-  return zCyl3DFScan( fp, shape ); }
-static void _zShape3DFPrintCyl(FILE *fp, void *shape){
-  return zCyl3DFPrint( fp, shape ); }
+static bool _zShape3DCylRegZTK(ZTK *ztk, char *tag){
+  return ZTKDefRegPrp( ztk, tag, __ztk_prp_shape_cyl ); }
+static void *_zShape3DCylParseZTK(void *shape, ZTK *ztk){
+  zCyl3DInit( shape );
+  return ZTKEvalKey( shape, NULL, ztk, __ztk_prp_shape_cyl ); }
+static void _zShape3DCylFPrintZTK(FILE *fp, void *shape){
+  ZTKPrpKeyFPrint( fp, shape, __ztk_prp_shape_cyl ); }
 
-zShape3DCom zeo_shape_cyl3d_com = {
+zShape3DCom zeo_shape3d_cyl_com = {
   "cylinder",
-  _zShape3DInitCyl,
-  _zShape3DAllocCyl,
-  _zShape3DCloneCyl,
-  _zShape3DMirrorCyl,
-  _zShape3DDestroyCyl,
-  _zShape3DXformCyl,
-  _zShape3DXformInvCyl,
-  _zShape3DClosestCyl,
-  _zShape3DPointDistCyl,
-  _zShape3DPointIsInsideCyl,
-  _zShape3DVolumeCyl,
-  _zShape3DBarycenterCyl,
-  _zShape3DInertiaCyl,
-  _zShape3DBaryInertiaCyl,
-  _zShape3DToPHCyl,
-  _zShape3DParseZTKCyl,
-  _zShape3DFScanCyl,
-  _zShape3DFPrintCyl,
+  _zShape3DCylInit,
+  _zShape3DCylAlloc,
+  _zShape3DCylClone,
+  _zShape3DCylMirror,
+  _zShape3DCylDestroy,
+  _zShape3DCylXform,
+  _zShape3DCylXformInv,
+  _zShape3DCylClosest,
+  _zShape3DCylPointDist,
+  _zShape3DCylPointIsInside,
+  _zShape3DCylVolume,
+  _zShape3DCylBarycenter,
+  _zShape3DCylInertia,
+  _zShape3DCylBaryInertia,
+  _zShape3DCylToPH,
+  _zShape3DCylRegZTK,
+  _zShape3DCylParseZTK,
+  _zShape3DCylFPrintZTK,
 };
 
 /* create a 3D shape as a cylinder. */
-zShape3D *zShape3DCreateCyl(zShape3D *shape, zVec3D *c1, zVec3D *c2, double r, int div)
+zShape3D *zShape3DCylCreate(zShape3D *shape, zVec3D *c1, zVec3D *c2, double r, int div)
 {
   zShape3DInit( shape );
   if( !( shape->body = zCyl3DAlloc() ) ) return NULL;
   zCyl3DCreate( zShape3DCyl(shape), c1, c2, r, div );
-  shape->com = &zeo_shape_cyl3d_com;
+  shape->com = &zeo_shape3d_cyl_com;
   return shape;
 }
