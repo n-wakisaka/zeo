@@ -130,49 +130,12 @@ __EXPORT zPH3D *zSphere3DToPH(zSphere3D *sphere, zPH3D *ph);
  */
 __EXPORT zSphere3D *zSphere3DFit(zSphere3D *s, zVec3DList *pc);
 
-/*! \brief register a definition of tag-and-keys for a 3D sphere to a ZTK format processor. */
-__EXPORT bool zSphere3DDefRegZTK(ZTK *ztk, char *tag);
-/*! \brief read a 3D sphere from a ZTK format processor. */
-__EXPORT zSphere3D *zSphere3DFromZTK(zSphere3D *sphere, ZTK *ztk);
-
-/*! \brief scan and print a 3D sphere.
- *
- * zSphere3DFScan() scans information of a 3D sphere from the
- * current position of a file \a fp and creates the new sphere
- * \a sphere. An acceptable data file format is as follows.
- *
- *  center: <x> <y> <z>
- *  radius: <r>
- *  div: <div>
- *
- * The bracketed parts must be replaced by real numbers.
- * The field div is skippable.
- *
- * zSphere3DScan() scans information for \a sphere from the
- * standard input.
- *
- * zSphere3DFPrint() prints information of \a sphere out to the
- * current position of a file \a fp in the same format with the
- * above.
- *
- * zSphere3DPrint() prints information of \a sphere out to the
- * standard output.
- * \return
- * zSphere3DFScan() and zSphere3DScan() return a pointer \a sphere.
- *
- * Neither zSphere3DFPrint() nor zSphere3DPrint() return any values.
- */
-__EXPORT zSphere3D *zSphere3DFScan(FILE *fp, zSphere3D *sphere);
-#define zSphere3DScan(s) zSphere3DFScan( stdin, (s) )
-__EXPORT void zSphere3DFPrint(FILE *fp, zSphere3D *sphere);
-#define zSphere3DPrint(s) zSphere3DFPrint( stdout, (s) )
-
 /* methods for abstraction */
-extern zShape3DCom zeo_shape_sphere3d_com;
+extern zShape3DCom zeo_shape3d_sphere_com;
 
 #define zShape3DSphere(s) ( (zSphere3D*)(s)->body )
 
-__EXPORT zShape3D *zShape3DCreateSphere(zShape3D *shape, zVec3D *c, double r, int div);
+__EXPORT zShape3D *zShape3DSphereCreate(zShape3D *shape, zVec3D *c, double r, int div);
 
 __END_DECLS
 

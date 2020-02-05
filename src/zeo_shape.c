@@ -21,6 +21,19 @@ zShape3D *zShape3DInit(zShape3D *shape)
   return shape;
 }
 
+/* assign a method of a 3D shape by referring a string. */
+zShape3D *zShape3DQueryAssign(zShape3D *shape, char *str)
+{
+  ZEO_SHAPE_COM_ARRAY;
+  register int k;
+
+  shape->com = NULL;
+  for( k=0; _zeo_shape_com[k]; k++ )
+    if( strcmp( _zeo_shape_com[k]->typestr, str ) == 0 )
+      return ( shape->body = ( shape->com = _zeo_shape_com[k] )->_alloc() ) ? shape : NULL;
+  return NULL;
+}
+
 /* destroy a 3D shape. */
 void zShape3DDestroy(zShape3D *shape)
 {
@@ -97,7 +110,7 @@ zShape3D *zShape3DToPH(zShape3D *shape)
   }
   if( shape->com->_toph( shape->body, ph ) ){
     shape->body = ph;
-    shape->com = &zeo_shape_ph3d_com;
+    shape->com = &zeo_shape3d_ph_com;
     return shape;
   }
   zPH3DDestroy( ph );
@@ -131,23 +144,7 @@ static void *_zShape3DNameFromZTK(void *obj, int i, void *arg, ZTK *ztk){
   return zNamePtr((zShape3D*)obj) ? obj : NULL;
 }
 static void *_zShape3DTypeFromZTK(void *obj, int i, void *arg, ZTK *ztk){
-  /* this should be implemented as a more general function. */
-  zShape3DCom *com[] = {
-    &zeo_shape_ph3d_com, &zeo_shape_box3d_com,
-    &zeo_shape_sphere3d_com, &zeo_shape_ellips3d_com,
-    &zeo_shape_cyl3d_com, &zeo_shape_ecyl3d_com, &zeo_shape_cone3d_com,
-    &zeo_shape_nurbs_com,
-    NULL,
-  };
-  register int k;
-
-  ((zShape3D*)obj)->com = NULL;
-  for( k=0; com[k]; k++ )
-    if( strcmp( com[k]->typestr, ZTKVal(ztk) ) == 0 ){
-      ((zShape3D*)obj)->com = com[k];
-      return ( ((zShape3D*)obj)->body = ((zShape3D*)obj)->com->_alloc() ) ? obj : NULL;
-    }
-  return NULL;
+  return zShape3DQueryAssign( (zShape3D*)obj, ZTKVal(ztk) );
 }
 static void *_zShape3DOpticFromZTK(void *obj, int i, void *arg, ZTK *ztk){
   zArrayFindName( ((_zShape3DRefPrp*)arg)->oarray, ZTKVal(ztk), zShape3DOptic((zShape3D*)obj) );
@@ -185,17 +182,15 @@ static ZTKPrp __ztk_prp_shape[] = {
 };
 
 /* register a definition of tag-and-keys for a 3D shape to a ZTK format processor. */
-bool zShape3DRegZTK(ZTK *ztk)
+bool zShape3DRegZTK(ZTK *ztk, char *tag)
 {
-  return ZTKDefRegPrp( ztk, ZTK_TAG_SHAPE, __ztk_prp_shape ) &&
-         zBox3DDefRegZTK( ztk, ZTK_TAG_SHAPE ) &&
-         zSphere3DDefRegZTK( ztk, ZTK_TAG_SHAPE ) &&
-         zCyl3DDefRegZTK( ztk, ZTK_TAG_SHAPE ) &&
-         zCone3DDefRegZTK( ztk, ZTK_TAG_SHAPE ) &&
-         zEllips3DDefRegZTK( ztk, ZTK_TAG_SHAPE ) &&
-         zECyl3DDefRegZTK( ztk, ZTK_TAG_SHAPE ) &&
-         zPH3DDefRegZTK( ztk, ZTK_TAG_SHAPE ) &&
-         zNURBS3DDefRegZTK( ztk, ZTK_TAG_SHAPE );
+  ZEO_SHAPE_COM_ARRAY;
+  register int k;
+
+  if( !ZTKDefRegPrp( ztk, tag, __ztk_prp_shape ) ) return false;
+  for( k=0; _zeo_shape_com[k]; k++ )
+    if( !_zeo_shape_com[k]->_regZTK( ztk, tag ) ) return false;
+  return true;
 }
 
 /* read a 3D shape from a ZTK format processor. */
@@ -208,109 +203,48 @@ zShape3D *zShape3DFromZTK(zShape3D *shape, zShape3DArray *sarray, zOpticalInfoAr
   prp.sarray = sarray;
   prp.oarray = oarray;
   prp.mirrored = false;
-  if( !ZTKEncodeKey( shape, &prp, ztk, __ztk_prp_shape ) ) return NULL;
+  if( !ZTKEvalKey( shape, &prp, ztk, __ztk_prp_shape ) ) return NULL;
   if( prp.mirrored ) return shape;
   if( !shape->com ){
     ZRUNERROR( ZEO_ERR_SHAPE_INVALID );
     return NULL;
   }
-  if( !shape->com->_parseZTK( shape->body, ztk ) ) return NULL;
+  if( !shape->com->_fromZTK( shape->body, ztk ) ) return NULL;
   return shape;
 }
 
 /* print out a 3D shape to a file. */
-void zShape3DFPrint(FILE *fp, zShape3D *shape)
+void zShape3DFPrintZTK(FILE *fp, zShape3D *shape)
 {
   if( !shape ) return;
   ZTKPrpKeyFPrint( fp, shape, __ztk_prp_shape );
-  shape->com->_fprint( fp, shape->body );
+  shape->com->_fprintZTK( fp, shape->body );
   fprintf( fp, "\n" );
 }
 
-
-
-
-typedef struct{
-  zShape3D *shape;
-  zShape3D *sarray;
-  int ns;
-  zOpticalInfo *oarray;
-  int no;
-  bool referred;
-} _zShape3DParam;
-
-static bool _zShape3DFScan(FILE *fp, void *instance, char *buf, bool *success);
-
-/* (static)
- * scan a 3D shape (internal function). */
-bool _zShape3DFScan(FILE *fp, void *instance, char *buf, bool *success)
+/* read a 3D shape from a ZTK format file. */
+zShape3D *zShape3DReadZTK(zShape3D *shape, char filename[])
 {
-  zShape3DCom *com[] = {
-    &zeo_shape_ph3d_com, &zeo_shape_box3d_com,
-    &zeo_shape_sphere3d_com, &zeo_shape_ellips3d_com,
-    &zeo_shape_cyl3d_com, &zeo_shape_ecyl3d_com, &zeo_shape_cone3d_com,
-    &zeo_shape_nurbs_com,
-    NULL,
-  };
-  _zShape3DParam *prm;
-  zShape3D *ref = NULL;
-  register int k;
+  ZTK ztk;
 
-  prm = instance;
-  if( strcmp( buf, "type" ) == 0 ){
-    prm->shape->com = NULL;
-    zFToken( fp, buf, BUFSIZ );
-    for( k=0; com[k]; k++ )
-      if( strcmp( com[k]->typestr, buf ) == 0 )
-        prm->shape->com = com[k];
-  } else if( strcmp( buf, "name" ) == 0 ){
-    if( !( zNameSet( prm->shape, zFToken(fp,buf,BUFSIZ) ) ) )
-      return ( *success = false );
-  } else if( strcmp( buf, "optic" ) == 0 ){
-    zFToken( fp, buf, BUFSIZ );
-    zNameFind( prm->oarray, prm->no, buf, zShape3DOptic(prm->shape) );
-  } else if( strcmp( buf, "mirror" ) == 0 ){
-    zFToken( fp, buf, BUFSIZ );
-    zNameFind( prm->sarray, prm->ns, buf, ref );
-    if( !ref ){
-      ZRUNWARN( ZEO_ERR_SHAPE_UNDEF, buf );
-    } else{
-      zFToken( fp, buf, BUFSIZ );
-      if( !zShape3DMirror( ref, prm->shape, zAxisFromStr(buf) ) )
-        return ( *success = false );
-      prm->referred = true;
-    }
-  } else
-    return false;
-  return true;
+  ZTKInit( &ztk );
+  if( !zShape3DRegZTK( &ztk, "" ) ) return NULL;
+  ZTKParse( &ztk, filename );
+  shape = zShape3DFromZTK( shape, NULL, NULL, &ztk );
+  ZTKDestroy( &ztk );
+  return shape;
 }
 
-/* scan a 3D shape from a file. */
-zShape3D *zShape3DFScan(FILE *fp, zShape3D *shape, zShape3D *sarray, int ns, zOpticalInfo *oarray, int no)
+/* write a 3D shape to a ZTK format file. */
+bool zShape3DWriteZTK(zShape3D *shape, char filename[])
 {
-  _zShape3DParam prm;
-  int cur;
+  FILE *fp;
 
-  prm.shape = shape;
-  prm.sarray = sarray;
-  prm.ns = ns;
-  prm.oarray = oarray;
-  prm.no = no;
-  prm.referred = false;
-  zShape3DInit( shape );
-  cur = ftell( fp );
-  if( !zFieldFScan( fp, _zShape3DFScan, &prm ) ) goto ERROR;
-  if( prm.referred ) return shape;
-  if( !zNamePtr( shape ) ){
-    ZRUNERROR( ZEO_ERR_SHAPE_UNNAME );
-    goto ERROR;
+  if( !( fp = zOpenZTKFile( filename, "w" ) ) ){
+    ZOPENERROR( filename );
+    return false;
   }
-  fseek( fp, cur, SEEK_SET );
-  if( !( shape->body = shape->com->_alloc() ) ) goto ERROR;
-  if( !shape->com->_fscan( fp, shape->body ) ) goto ERROR;
-  return shape;
-
- ERROR:
-  zShape3DDestroy( shape );
-  return NULL;
+  zShape3DFPrintZTK( fp, shape );
+  fclose( fp );
+  return true;
 }

@@ -184,38 +184,11 @@ __EXPORT zPH3D *zPH3DTorus(zPH3D *torus, zVec3D loop[], int n, int div, zVec3D *
 __EXPORT zPH3D *zPH3DLathe(zPH3D *lathe, zVec3D rim[], int n, int div, zVec3D *center, zVec3D *axis);
 
 /*! \brief register a definition of tag-and-keys for a 3D polyhedron cylinder to a ZTK format processor. */
-__EXPORT bool zPH3DDefRegZTK(ZTK *ztk, char *tag);
+__EXPORT bool zPH3DRegZTK(ZTK *ztk, char *tag);
 /*! \brief read a 3D polyhedron from a ZTK format processor. */
 __EXPORT zPH3D *zPH3DFromZTK(zPH3D *ph, ZTK *ztk);
 
-/*! \brief scan and print a 3D polyhedron.
- *
- * zPH3DFScan() scans information of a 3D polyhedron from
- * the current position of a file \a fp, and creates a new
- * 3D polyhedron \a ph.
- * An acceptable data file format is as follows.
- *  vert 0: <x> <y> <z>
- *   ...
- *  vert <n>: <x> <y> <z>
- *  face <v1> <v2> <v3>
- *   ...
- * Each bracketed value must be substituted for a real number.
- * zPH3DScan() scans information for \a ph from the standard
- * input.
- *
- * zPH3DFPrint() prints information of \a ph out to the
- * current position of a file \a fp in the above format.
- * zPH3DPrint() prints information of \a ph out to the
- * standard output.
- * \return
- * zPH3DFScan() and zPH3DScan() return a pointer \a ph.
- *
- * zPH3DFPrint() nor zPH3DPrint() return no values.
- */
-__EXPORT zPH3D *zPH3DFScan(FILE *fp, zPH3D *ph);
-#define zPH3DScan(ph)  zPH3DFScan( stdin, (ph) )
-__EXPORT void zPH3DFPrint(FILE *fp, zPH3D *ph);
-#define zPH3DPrint(ph) zPH3DFPrint( stdout, (ph) )
+__EXPORT void zPH3DFPrintZTK(FILE *fp, zPH3D *ph);
 
 __END_DECLS
 

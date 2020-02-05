@@ -1,93 +1,83 @@
 Zeo - Z/Geometry and optics computation library.
-Copyright (C) 2005 Tomomichi Sugihara (Zhidao)
+=================================================================
+Copyright (C) Tomomichi Sugihara (Zhidao) since 2005
 
 | *master* | *develop* |
 |----------|-----------|
 | [![Build Status](https://travis-ci.org/n-wakisaka/zeo.svg?branch=master)](https://travis-ci.org/n-wakisaka/zeo) | [![Build Status](https://travis-ci.org/n-wakisaka/zeo.svg?branch=develop)](https://travis-ci.org/n-wakisaka/zeo)
 
 -----------------------------------------------------------------
-[What is this?]
+## [What is this?]
 
 Zeo is a handy library for computational geometry and optics
 including:
- - color and optics computations
- - 2D/3D vectors and matrices
- - 6D spatial vectors and matrices
- - 3D frame and coordinate transportation
- - Euler parameter (unit quaternion)
- - 3D shape elements (plane, edge and triangle)
- - 3D shape primitives (box, sphere, cylinder, cone, ellipsoid,
-   elliptic cylinder, polyhedron)
- - multiple 3D shapes
- - point cloud
- - trianglation of non-convex
- - bounding volume (AABB, OBB, boundin ball, convex-hull)
- - collision checking (AABB tree, GJK, Muller-Preparata)
- - principal component analysis of point cloud
- - B-Rep (boundary representation) and boolean operations
- - elevation map
+- color and optics computations
+- 2D/3D vectors and matrices
+- 6D spatial vectors and matrices
+- 3D frame and coordinate transportation
+- Euler parameter (unit quaternion)
+- 3D shape elements (plane, edge and triangle)
+- 3D shape primitives (box, sphere, cylinder, cone, ellipsoid,
+  elliptic cylinder, polyhedron)
+- multiple 3D shapes
+- point cloud
+- trianglation of non-convex
+- bounding volume (AABB, OBB, boundin ball, convex-hull)
+- collision checking (AABB tree, GJK, Muller-Preparata)
+- principal component analysis of point cloud
+- B-Rep (boundary representation) and boolean operations
+- elevation map
 
-ZEDA and ZM are required.
-
------------------------------------------------------------------
-[Installation / Uninstallation]
-
-<install>
-0. Install ZEDA and ZM in advance.
-
-1. Unpack the distributed archive where you want.
-
-% zcat zeo-X.Y.Z.tgz | tar xvf
-or
-% tar xzvf zeo-X.Y.Z.tgz (GNU tar)
-
-X.Y.Z is for the revision.
-
-2. Enter the directory.
-
-% cd zeo-X.Y.Z
-
-3. Edit config file if necessary.
-  PREFIX   directory where the library is installed.
-           ~/usr as a default. In this case, header files
-           and library are installed under ~/usr/include
-           and ~/usr/lib, respectively.
-
-4. Make it.
-
-% make
-
-5. Install it.
-
-% make install
-
-Or,
-
-% cp -a lib/libzeo.so $PREFIX/lib/
-% cp -a include/zeo $PREFIX/include/
-% cp -a bin/* $PREFIX/bin/
-
-<uninstall>
-Delete $PREFIX/lib/libzeo.so and $PREFIX/include/zeo.
+ZEDA and ZM are required to be installed.
 
 -----------------------------------------------------------------
-[How to use]
+## [Installation / Uninstallation]
 
-You may need to set your PATH and LD_LIBRARY_PATH environment
-variables. This is done by:
- export PATH=$PATH:$PREFIX/bin
- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PREFIX/lib
-if your working shell is Bourne shell (bash, zsh, etc.), or by:
- set path = ( $path $PREFIX/bin )
- setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH:$PREFIX/lib
-if your working shell is C shell (csh, tcsh, etc.).
+### install
 
-When you want to compile your code test.c, for example, the following
-line will work.
+Install ZEDA and ZM in advance.
 
-% gcc `zeo-config -L` `zeo-config -I` test.c `zeo-config -l`
+Move to a directly under which you want to install Zeo, and run:
+
+   ```
+   % git clone https://github.com/zhidao/zeo.git
+   % cd zeo
+   ```
+
+Edit **PREFIX** in *config* file if necessary in order to specify
+a directory where the header files, the library and some utilities
+are installed. (default: ~/usr)
+
+   - header files: $PREFIX/include/zeo
+   - library file: $PREFIX/lib
+   - utilities: $PREFIX/bin
+
+Then, make and install.
+
+   ```
+   % make && make install
+   ```
+
+### uninstall
+
+Do:
+
+   ```
+   % make uninstall
+   ```
+
+which removes $PREFIX/lib/libzeo.so and $PREFIX/include/zeo.
 
 -----------------------------------------------------------------
-[Contact]
+## [How to use]
+
+When you want to compile your code *test.c*, for example, the following line will work.
+
+   ```
+   % gcc `zeo-config -L` `zeo-config -I` test.c `zeo-config -l`
+   ```
+
+-----------------------------------------------------------------
+## [Contact]
 
 zhidao@ieee.org
