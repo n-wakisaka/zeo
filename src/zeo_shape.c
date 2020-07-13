@@ -18,6 +18,7 @@ zShape3D *zShape3DInit(zShape3D *shape)
   shape->body = NULL;
   shape->com = NULL;
   zShape3DSetOptic( shape, NULL );
+  zShape3DSetTexture( shape, NULL );
   return shape;
 }
 
@@ -42,6 +43,7 @@ void zShape3DDestroy(zShape3D *shape)
   shape->com->_destroy( shape->body );
   zFree( shape->body );
   zShape3DSetOptic( shape, NULL );
+  zShape3DSetTexture( shape, NULL );
 }
 
 /* clone a 3D shape. */
@@ -54,6 +56,7 @@ zShape3D *zShape3DClone(zShape3D *org, zShape3D *cln, zOpticalInfo *oi)
   if( !( cln->body = ( cln->com = org->com )->_clone( org->body ) ) )
     return NULL;
   zShape3DSetOptic( cln, oi );
+  zShape3DSetTexture( cln, zShape3DTexture(org) );
   return cln;
 }
 
@@ -63,6 +66,7 @@ zShape3D *zShape3DMirror(zShape3D *src, zShape3D *dest, zAxis axis)
   if( !( dest->body = ( dest->com = src->com )->_mirror( src->body, axis ) ) )
     return NULL;
   zShape3DSetOptic( dest, zShape3DOptic(src) );
+  zShape3DSetTexture( dest, zShape3DTexture(src) );
   return dest;
 }
 
@@ -118,6 +122,30 @@ zShape3D *zShape3DToPH(zShape3D *shape)
   return NULL;
 }
 
+/* read a shape from a STL file. */
+zShape3D *zShape3DFReadSTL(FILE *fp, zShape3D *shape)
+{
+  char buf[BUFSIZ];
+
+  if( shape->com && shape->com != &zeo_shape3d_ph_com )
+    ZRUNWARN( ZEO_WARN_SHAPE_OVRRDN_PH );
+  zShape3DQueryAssign( shape, "polyhedron" );
+  if( !zPH3DFReadSTL( fp, zShape3DPH(shape), buf, BUFSIZ ) ) return NULL;
+  if( !zNamePtr(shape) )
+    if( !zNameSet( shape, buf ) ) return NULL;
+  return shape;
+}
+
+/* read a shape from a PLY file. */
+zShape3D *zShape3DFReadPLY(FILE *fp, zShape3D *shape)
+{
+  if( shape->com && shape->com != &zeo_shape3d_ph_com )
+    ZRUNWARN( ZEO_WARN_SHAPE_OVRRDN_PH );
+  zShape3DQueryAssign( shape, "polyhedron" );
+  if( !zPH3DFReadPLY( fp, zShape3DPH(shape) ) ) return NULL;
+  return shape;
+}
+
 /* parse ZTK format */
 
 /* read the number of division for smooth primitives from a ZTK format processor. */
@@ -130,12 +158,14 @@ int zShape3DDivFromZTK(ZTK *ztk)
 typedef struct{
   zShape3DArray *sarray;
   zOpticalInfoArray *oarray;
-  bool mirrored;
+  zTextureArray *tarray;
+  bool imported;
 } _zShape3DRefPrp;
 
 static void *_zShape3DNameFromZTK(void *obj, int i, void *arg, ZTK *ztk){
-  zShape3D *shape;
-  zArrayFindName( ((_zShape3DRefPrp*)arg)->sarray, ZTKVal(ztk), shape );
+  zShape3D *shape = NULL;
+  if( ((_zShape3DRefPrp*)arg)->sarray )
+    zArrayFindName( ((_zShape3DRefPrp*)arg)->sarray, ZTKVal(ztk), shape );
   if( shape ){
     ZRUNWARN( ZEO_WARN_SHAPE_DUP, ZTKVal(ztk) );
     return NULL;
@@ -147,20 +177,55 @@ static void *_zShape3DTypeFromZTK(void *obj, int i, void *arg, ZTK *ztk){
   return zShape3DQueryAssign( (zShape3D*)obj, ZTKVal(ztk) );
 }
 static void *_zShape3DOpticFromZTK(void *obj, int i, void *arg, ZTK *ztk){
-  zArrayFindName( ((_zShape3DRefPrp*)arg)->oarray, ZTKVal(ztk), zShape3DOptic((zShape3D*)obj) );
+  if( ((_zShape3DRefPrp*)arg)->oarray )
+    zArrayFindName( ((_zShape3DRefPrp*)arg)->oarray, ZTKVal(ztk), zShape3DOptic((zShape3D*)obj) );
   if( !zShape3DOptic((zShape3D*)obj) )
     ZRUNWARN( ZEO_WARN_SHAPE_UNKNOWNOPTIC, ZTKVal(ztk) );
   return obj;
 }
+static void *_zShape3DTextureFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  if( ((_zShape3DRefPrp*)arg)->tarray )
+    zArrayFindName( ((_zShape3DRefPrp*)arg)->tarray, ZTKVal(ztk), zShape3DTexture((zShape3D*)obj) );
+  if( !zShape3DTexture((zShape3D*)obj) )
+    ZRUNWARN( ZEO_WARN_SHAPE_UNKNOWNTEXTURE, ZTKVal(ztk) );
+  return obj;
+}
 static void *_zShape3DMirrorFromZTK(void *obj, int i, void *arg, ZTK *ztk){
-  zShape3D *ref;
-  zArrayFindName( ((_zShape3DRefPrp*)arg)->sarray, ZTKVal(ztk), ref );
+  zShape3D *ref = NULL;
+  if( ((_zShape3DRefPrp*)arg)->sarray )
+    zArrayFindName( ((_zShape3DRefPrp*)arg)->sarray, ZTKVal(ztk), ref );
   if( ref ){
     if( !ZTKValNext(ztk) ) return NULL;
     if( !zShape3DMirror( ref, (zShape3D*)obj, zAxisFromStr(ZTKVal(ztk)) ) ) return NULL;
-    ((_zShape3DRefPrp*)arg)->mirrored = true;
+    ((_zShape3DRefPrp*)arg)->imported = true;
   } else
     ZRUNWARN( ZEO_ERR_SHAPE_UNDEF, ZTKVal(ztk) );
+  return obj;
+}
+static void *_zShape3DImportFromZTK(void *obj, int i, void *arg, ZTK *ztk){
+  char *suffix;
+  FILE *fp;
+
+  if( !( fp = fopen( ZTKVal(ztk), "r" ) ) ){
+    ZOPENERROR( ZTKVal(ztk) );
+    return NULL;
+  }
+  suffix = zGetSuffix( ZTKVal(ztk) );
+  if( strcmp( suffix, "stl" ) == 0 || strcmp( suffix, "STL" ) == 0 ){
+    if( !zShape3DFReadSTL( fp, obj ) ) obj = NULL;
+  } else
+  if( strcmp( suffix, "ply" ) == 0 || strcmp( suffix, "PLY" ) == 0 ){
+    if( !zShape3DFReadPLY( fp, obj ) ) obj = NULL;
+  } else{
+    ZRUNERROR( ZEO_WARN_SHAPE_UNKNOWNFORMAT, suffix );
+    obj = NULL;
+  }
+  if( obj ){
+    ((_zShape3DRefPrp*)arg)->imported = true;
+    if( ZTKValNext(ztk) )
+      zPH3DScale( zShape3DPH((zShape3D*)obj), atof(ZTKVal(ztk)) );
+  }
+  fclose( fp );
   return obj;
 }
 
@@ -173,12 +238,17 @@ static void _zShape3DTypeFPrint(FILE *fp, int i, void *obj){
 static void _zShape3DOpticFPrint(FILE *fp, int i, void *obj){
   fprintf( fp, "%s\n", zName(zShape3DOptic((zShape3D*)obj)) );
 }
+static void _zShape3DTextureFPrint(FILE *fp, int i, void *obj){
+  fprintf( fp, "%s\n", zName(zShape3DTexture((zShape3D*)obj)) );
+}
 
 static ZTKPrp __ztk_prp_shape[] = {
   { "name", 1, _zShape3DNameFromZTK, _zShape3DNameFPrint },
   { "type", 1, _zShape3DTypeFromZTK, _zShape3DTypeFPrint },
   { "optic", 1, _zShape3DOpticFromZTK, _zShape3DOpticFPrint },
+  { "texture", 1, _zShape3DTextureFromZTK, _zShape3DTextureFPrint },
   { "mirror", 1, _zShape3DMirrorFromZTK, NULL },
+  { "import", 1, _zShape3DImportFromZTK, NULL },
 };
 
 /* register a definition of tag-and-keys for a 3D shape to a ZTK format processor. */
@@ -194,17 +264,18 @@ bool zShape3DRegZTK(ZTK *ztk, char *tag)
 }
 
 /* read a 3D shape from a ZTK format processor. */
-zShape3D *zShape3DFromZTK(zShape3D *shape, zShape3DArray *sarray, zOpticalInfoArray *oarray, ZTK *ztk)
+zShape3D *zShape3DFromZTK(zShape3D *shape, zShape3DArray *sarray, zOpticalInfoArray *oarray, zTextureArray *tarray, ZTK *ztk)
 {
   _zShape3DRefPrp prp;
 
   zShape3DInit( shape );
-  /* type, name, associated optical info and mirroring */
+  /* type, name, associated optical info, and mirroring/importing operations */
   prp.sarray = sarray;
   prp.oarray = oarray;
-  prp.mirrored = false;
+  prp.tarray = tarray;
+  prp.imported = false;
   if( !ZTKEvalKey( shape, &prp, ztk, __ztk_prp_shape ) ) return NULL;
-  if( prp.mirrored ) return shape;
+  if( prp.imported ) return shape;
   if( !shape->com ){
     ZRUNERROR( ZEO_ERR_SHAPE_INVALID );
     return NULL;
@@ -230,7 +301,7 @@ zShape3D *zShape3DReadZTK(zShape3D *shape, char filename[])
   ZTKInit( &ztk );
   if( !zShape3DRegZTK( &ztk, "" ) ) return NULL;
   ZTKParse( &ztk, filename );
-  shape = zShape3DFromZTK( shape, NULL, NULL, &ztk );
+  shape = zShape3DFromZTK( shape, NULL, NULL, NULL, &ztk );
   ZTKDestroy( &ztk );
   return shape;
 }

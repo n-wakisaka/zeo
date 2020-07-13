@@ -18,6 +18,9 @@
 
 #define ZEO_ERR_RGB          "invalid size of RGB specification, strlen(%s)=%d"
 
+#define ZEO_ERR_TEXTURE_INVALID_COORD_ID "%d: invalid identifier of a coordinate specified."
+#define ZEO_WARN_TEXTURE_UNKNOWN_TYPE "unknown texture type: %s"
+
 #define ZEO_ERR_INVINDEX     "invalid index specified"
 
 #define ZEO_ERR_ELEM_DEGP    "too small normal vector to define a plane"
@@ -36,7 +39,17 @@
 #define ZEO_ERR_OPT_INV      "invalid description for optical-info"
 #define ZEO_ERR_OPT_UNNAME   "unnamed optical-info exists"
 
+#define ZEO_ERR_STL_UNREADABLE "File unreadable. Probably not a STL file."
 #define ZEO_ERR_STL_INCOMPLETE "incomplete STL file"
+
+#define ZEO_ERR_PLY_UNREADABLE  "File unreadable. Probably not a PLY file"
+#define ZEO_ERR_PLY_INCOMPLETE  "incomplete PLY file"
+#define ZEO_ERR_PLY_INV_FORMAT  "invalid format %s"
+#define ZEO_ERR_PLY_TOOMANYELEM "too many definitions of elements"
+#define ZEO_ERR_PLY_TOOMANYPRP  "too many definitions of properties"
+#define ZEO_ERR_PLY_UNKNOWNELEM "unknown element: %s"
+#define ZEO_ERR_PLY_UNKNOWNPRP  "unknown property: %s"
+#define ZEO_ERR_PLY_UNSUPPORTED "unsupported description"
 
 #define ZEO_ERR_NURBS_INVDIM "invalid dimension specified for NURBS, or lack of control points"
 #define ZEO_ERR_NURBS_SIZMIS      "size mismatch of NURBS surfaces"
@@ -71,6 +84,9 @@
 
 /* warning messages */
 
+#define ZEO_WARN_TEXTURE_COORD_UNMATCH "%d: unmatched identifier of a coordinate"
+#define ZEO_WARN_TEXTURE_EMPTY         "empty set of coordinates assigned for a texture."
+
 #define ZEO_WARN_PH_EMPTY         "empty set of vertices assigned for a polyhedron."
 #define ZEO_WARN_PH_VERT_UNMATCH  "%d: unmatched identifier of a vertex"
 
@@ -84,6 +100,9 @@
 #define ZEO_WARN_SHAPE_DUP        "%s: name of a shape duplicated."
 #define ZEO_WARN_SHAPE_BB_INVALID "bounding-box not generated because it is only for polyhedra."
 #define ZEO_WARN_SHAPE_UNKNOWNOPTIC "%s: unknown name of optical info set."
+#define ZEO_WARN_SHAPE_UNKNOWNTEXTURE "%s: unknown name of a texture data."
+#define ZEO_WARN_SHAPE_OVRRDN_PH "shape type overridden by polyhedron"
+#define ZEO_WARN_SHAPE_UNKNOWNFORMAT "%s: unknown format of a shape."
 
 #define ZEO_WARN_MSHAPE_EMPTY     "empty shapes assigned."
 
